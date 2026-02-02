@@ -1,3 +1,5 @@
+from glob import glob
+
 from setuptools import find_packages, setup
 
 package_name = "floorplan_generator_stage"
@@ -15,8 +17,12 @@ setup(
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
         (
-            "share/" + package_name + "/config",
-            ["floorplan_generator_stage/floorplan_generator/config.toml"],
+            "share/" + package_name + "/launch",
+            glob("launch/*.launch.py"),
+        ),
+        (
+            "share/" + package_name + "/world",
+            glob("world/*.world"),
         ),
     ],
     package_data={"": ["py.typed"]},
