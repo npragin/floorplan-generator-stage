@@ -44,7 +44,7 @@ def copy_world_files_from_source_package(
         source_pkg_share = Path(get_package_share_directory(source_package))
     except Exception as e:
         raise RuntimeError(
-            f"Could not find package '{source_package}'. "
+            f"Could not find package '{source_package}' provided in robot configuration file. "
             f"Ensure the package is installed and sourced. Error: {e}"
         ) from e
 
