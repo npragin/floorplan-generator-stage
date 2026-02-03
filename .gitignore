@@ -1,0 +1,4 @@
+.mypy_cache
+.ruff_cach
+.pytest_cache
+__pycache__
