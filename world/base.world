@@ -1,7 +1,9 @@
 # base.world
-# simple cave environment with a pioneer robot based on the basic world file examples of 
+# template world to be filled out by the floorplan generation package.
+# adapted from a world file written by Markus Bader, which was adapted
+# from a world file written by:
 # Richard Vaughan Richard Vaughan, Andrew Howard, Luis Riazuelo
-# Authors: Markus Bader
+# Author: Noah Pragin
 
 # set the resolution of the underlying raytrace model in meters
 resolution 0.02
