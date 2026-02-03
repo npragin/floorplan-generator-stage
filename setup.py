@@ -6,7 +6,7 @@ package_name = "floorplan_generator_stage"
 
 setup(
     name=package_name,
-    version="0.0.0",
+    version="0.1.0",
     packages=find_packages(exclude=["test"]) + ["floorplan_generator"],
     package_dir={
         "floorplan_generator": (
@@ -32,6 +32,7 @@ setup(
         "numpy>=1.26.0",
         "pillow>=10.0.0",
         "typer>=0.9.0",
+        "pyyaml>=6.0",
     ],
     zip_safe=True,
     maintainer="npragin",

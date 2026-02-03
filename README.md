@@ -9,6 +9,10 @@ Procedural floorplan generation and Stage simulation launcher. Generates office-
 </p>
 <p align="center"><em>Example Floorplan</em></p>
 
+## Prerequisites
+- ROS 2 (tested with Jazzy and Kilted)
+- [Stage](https://github.com/rtv/Stage) and [stage_ros2](https://github.com/tuw-robotics/stage_ros2)
+
 ## Usage
 I've provided an example usage as a package in `example/example_usage`. There are three components you're expected to provide when using this package:
 

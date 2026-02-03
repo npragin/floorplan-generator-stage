@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>floorplan_generator_stage</name>
-  <version>0.0.0</version>
+  <version>0.1.0</version>
   <description>Procedural floorplan generation and Stage simulation launcher. Generates office-style environments from TOML configurations and launches them in Stage.</description>
   <maintainer email="npragin@gmail.com">npragin</maintainer>
   <license>GNU General Public License v3.0</license>
@@ -11,6 +11,7 @@
   <exec_depend>python3-shapely</exec_depend>
   <exec_depend>python3-pil</exec_depend>
   <exec_depend>python3-typer</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
