@@ -14,7 +14,7 @@ Procedural floorplan generation and Stage simulation launcher. Generates office-
 - [Stage](https://github.com/rtv/Stage) and [stage_ros2](https://github.com/tuw-robotics/stage_ros2)
 
 ## Usage
-I've provided an example usage as a package in `example/example_usage`. There are three components you're expected to provide when using this package:
+I've provided an example usage as a package in `example/example_usage`. You can copy this package into your workspace and run it with `ros2 launch example_usage example.launch.py`. There are three components you're expected to provide when using this package:
 
 ### 1. Configuration Files: `example_usage/config/`
 
