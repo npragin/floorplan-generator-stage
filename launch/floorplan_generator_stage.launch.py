@@ -119,9 +119,9 @@ def generate_robot_instances(
         with open(template_path, "r") as f:
             template_content = f.read()
 
-        if "{{robot-x}}" not in template_content or "{{robot-y}}" not in template_content:
+        if "{{robot-x}}" not in template_content or "{{robot-y}}" not in template_content or "{{robot-name}}" not in template_content:
             raise ValueError(
-                f"Robot template '{template_path}' must contain both {{robot-x}} and {{robot-y}} placeholders."
+                f"Robot template '{template_path}' must contain {{robot-x}}, {{robot-y}}, and {{robot-name}} placeholders."
             )
 
         for _ in range(count):
@@ -130,6 +130,7 @@ def generate_robot_instances(
             y = spawn["y"]
             instance = template_content.replace("{{robot-x}}", str(x))
             instance = instance.replace("{{robot-y}}", str(y))
+            instance = instance.replace("{{robot-name}}", f"robot_{position_index}")
             robot_instances.append(instance)
             position_index += 1
 

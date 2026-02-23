@@ -45,7 +45,7 @@ The header file is not a template. The contents of the header file will be inser
 
 #### Robot Templates: `example_usage/world/pioneer2dx_with_laser_template.world`
 
-The robot templates describe how to instantiate a robot in the generated floorplan. The template is expected to have two placeholders: `{{robot-x}}` and `{{robot-y}}`. The template will be pasted into the generated `.world` and these placeholders will be replaced with the robot's initial x and y position in the generated floorplan.
+The robot templates describe how to instantiate a robot in the generated floorplan. The template is expected to have two placeholders: `{{robot-x}}` and `{{robot-y}}`. The template will be pasted into the generated `.world` and these placeholders will be replaced with the robot's initial x and y position in the generated floorplan. The name of the robot will be `robot_0`, `robot_1`, ... based on the robot's global spawn index.
 
 ### 3. Launch File: `example_usage/launch/example.launch.py`
 
