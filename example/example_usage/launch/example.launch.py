@@ -36,6 +36,7 @@ def generate_launch_description():
         launch_arguments={
             "floorplan_config_path": floorplan_config_path,
             "robot_config_path": robot_config_path,
+            "publish_ground_truth_map": "true",
         }.items(),
     )
 
