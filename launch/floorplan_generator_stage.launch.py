@@ -6,6 +6,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch.actions import (
     DeclareLaunchArgument,
     ExecuteProcess,
+    LogInfo,
     OpaqueFunction,
     RegisterEventHandler,
 )
@@ -207,6 +208,8 @@ def process_generated_floorplan(context):
     use_sim_time = context.perform_substitution(LaunchConfiguration("use_sim_time")).lower() == "true"
     one_tf_tree = context.perform_substitution(LaunchConfiguration("one_tf_tree")).lower() == "true"
 
+    actions: list[Node | LogInfo] = []
+
     nodes: list[Node] = [
         Node(
             package="stage_ros2",
@@ -232,6 +235,20 @@ def process_generated_floorplan(context):
         width = config["map"]["width"]
         height = config["map"]["height"]
 
+        spawn_positions = config.get("robots", [])
+        if spawn_positions:
+            interior_x = float(spawn_positions[0]["x"])
+            interior_y = float(spawn_positions[0]["y"])
+        else:
+            actions.append(
+                LogInfo(
+                    msg="No robot spawn positions in world_config.yaml; "
+                    "using (0, 0) as interior seed for ground truth map"
+                )
+            )
+            interior_x = 0.0
+            interior_y = 0.0
+
         nodes.append(
             Node(
                 package="floorplan_generator_stage",
@@ -243,12 +260,14 @@ def process_generated_floorplan(context):
                     {"resolution": resolution},
                     {"map_width": float(width)},
                     {"map_height": float(height)},
+                    {"interior_x": interior_x},
+                    {"interior_y": interior_y},
                     {"use_sim_time": use_sim_time},
                 ],
             )
         )
 
-    return nodes
+    return actions + nodes
 
 
 def generate_launch_description():
