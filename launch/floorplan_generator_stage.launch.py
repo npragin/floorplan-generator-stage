@@ -3,7 +3,6 @@ from shutil import copy2, copytree
 
 import yaml
 from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
     ExecuteProcess,
@@ -18,6 +17,8 @@ from launch.substitutions import (
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
+from launch import LaunchDescription
+
 
 def copy_floorplan_to_bitmaps_dir(pkg_share: Path):
     bitmaps_dir = pkg_share / "world" / "bitmaps"
@@ -30,9 +31,7 @@ def copy_floorplan_to_bitmaps_dir(pkg_share: Path):
     print(f"Copied floorplan.png to {floorplan_dst}")
 
 
-def copy_world_files_from_source_package(
-    pkg_share: Path, source_package: str | None
-) -> None:
+def copy_world_files_from_source_package(pkg_share: Path, source_package: str | None) -> None:
     """Copy world directory from source package to floorplan_generator_stage."""
     if not source_package:
         raise ValueError(
@@ -51,8 +50,7 @@ def copy_world_files_from_source_package(
     source_world_dir = source_pkg_share / "world"
     if not source_world_dir.exists():
         raise RuntimeError(
-            f"No world/ directory found in package '{source_package}'. "
-            f"Expected directory at: {source_world_dir}"
+            f"No world/ directory found in package '{source_package}'. Expected directory at: {source_world_dir}"
         )
 
     dest_world_dir = pkg_share / "world"
@@ -61,13 +59,13 @@ def copy_world_files_from_source_package(
     print(f"Copied world/ directory from {source_package} to {dest_world_dir}")
 
 
-def load_robot_config(
-    pkg_share: Path, robot_config_path_str: str | None
-) -> tuple[str | None, dict[str, int]]:
-    """Load robot config from YAML, copy world files, and resolve paths.
+def load_robot_config(pkg_share: Path, robot_config_path_str: str | None) -> tuple[str | None, dict[str, int]]:
+    """
+    Load robot config from YAML, copy world files, and resolve paths.
 
     Returns:
         Tuple of (robot_header_path, robot_templates).
+
     """
     robot_header_path = None
     robot_templates: dict[str, int] = {}
@@ -76,7 +74,7 @@ def load_robot_config(
     if not robot_config_path_str:
         return robot_header_path, robot_templates
 
-    with open(robot_config_path_str, "r") as f:
+    with open(robot_config_path_str) as f:
         robot_config = yaml.safe_load(f)
 
     # Extract source package and copy its world directory
@@ -97,9 +95,7 @@ def load_robot_config(
     return robot_header_path, robot_templates
 
 
-def generate_robot_instances(
-    robot_templates: dict[str, int], spawn_positions: list[dict]
-) -> str:
+def generate_robot_instances(robot_templates: dict[str, int], spawn_positions: list[dict]) -> str:
     """Generate robot instances from templates and spawn positions."""
     total_robots_requested = sum(robot_templates.values())
     num_spawn_positions = len(spawn_positions)
@@ -116,10 +112,14 @@ def generate_robot_instances(
     position_index = 0
 
     for template_path, count in robot_templates.items():
-        with open(template_path, "r") as f:
+        with open(template_path) as f:
             template_content = f.read()
 
-        if "{{robot-x}}" not in template_content or "{{robot-y}}" not in template_content or "{{robot-name}}" not in template_content:
+        if (
+            "{{robot-x}}" not in template_content
+            or "{{robot-y}}" not in template_content
+            or "{{robot-name}}" not in template_content
+        ):
             raise ValueError(
                 f"Robot template '{template_path}' must contain {{robot-x}}, {{robot-y}}, and {{robot-name}} placeholders."
             )
@@ -158,12 +158,12 @@ def generate_world_file_content(
 
     header_content = ""
     if robot_header_path:
-        with open(robot_header_path, "r") as f:
+        with open(robot_header_path) as f:
             header_content = f.read().strip() + "\n\n"
 
     # Replace placeholders in base.world template
     template_path = pkg_share / "world" / "base.world"
-    with open(template_path, "r") as f:
+    with open(template_path) as f:
         template_content = f.read()
     base_content = template_content.replace("{{floorplan-x}}", str(width))
     base_content = base_content.replace("{{floorplan-y}}", str(height))
@@ -172,9 +172,7 @@ def generate_world_file_content(
     robot_content = ""
     if robot_templates:
         spawn_positions = config.get("robots", [])
-        robot_content = "\n\n" + generate_robot_instances(
-            robot_templates, spawn_positions
-        )
+        robot_content = "\n\n" + generate_robot_instances(robot_templates, spawn_positions)
 
     world_content = header_content + base_content + robot_content
 
@@ -183,31 +181,23 @@ def generate_world_file_content(
 
 def process_generated_floorplan(context):
     """Read world_config.yaml and replace placeholders in base.world template."""
-    pkg_share_str = context.perform_substitution(
-        FindPackageShare("floorplan_generator_stage")
-    )
+    pkg_share_str = context.perform_substitution(FindPackageShare("floorplan_generator_stage"))
     pkg_share = Path(pkg_share_str)
 
     copy_floorplan_to_bitmaps_dir(pkg_share)
 
     config_path = pkg_share / "output" / "world_config.yaml"
-    with open(config_path, "r") as f:
+    with open(config_path) as f:
         config = yaml.safe_load(f)
 
     # Get robot config path and parse it
-    robot_config_path_str = context.perform_substitution(
-        LaunchConfiguration("robot_config_path")
-    )
-    robot_header_path, robot_templates = load_robot_config(
-        pkg_share, robot_config_path_str
-    )
+    robot_config_path_str = context.perform_substitution(LaunchConfiguration("robot_config_path"))
+    robot_header_path, robot_templates = load_robot_config(pkg_share, robot_config_path_str)
 
     # Fill in the world file template
-    world_content = generate_world_file_content(
-        pkg_share, config, robot_header_path, robot_templates
-    )
+    world_content = generate_world_file_content(pkg_share, config, robot_header_path, robot_templates)
 
-    world_path = pkg_share / "world" / "generated.world"
+    world_path = pkg_share / "output" / "generated.world"
     world_path.parent.mkdir(parents=True, exist_ok=True)
     with open(world_path, "w") as f:
         f.write(world_content)
