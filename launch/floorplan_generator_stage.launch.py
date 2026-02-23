@@ -267,6 +267,25 @@ def process_generated_floorplan(context):
             )
         )
 
+    publish_initial_poses = (
+        context.perform_substitution(LaunchConfiguration("publish_initial_poses")).lower() == "true"
+    )
+
+    if publish_initial_poses:
+        spawn_positions_yaml = str(pkg_share / "output" / "world_config.yaml")
+        nodes.append(
+            Node(
+                package="floorplan_generator_stage",
+                executable="initial_pose_publisher",
+                name="initial_pose_publisher",
+                output="screen",
+                parameters=[
+                    {"spawn_positions_yaml": spawn_positions_yaml},
+                    {"use_sim_time": use_sim_time},
+                ],
+            )
+        )
+
     return actions + nodes
 
 
@@ -301,6 +320,12 @@ def generate_launch_description():
         "use_sim_time",
         default_value="true",
         description="Use simulation time from Stage",
+    )
+
+    publish_initial_poses_arg = DeclareLaunchArgument(
+        "publish_initial_poses",
+        default_value="false",
+        description="Publish each robot's initial pose as a PoseWithCovarianceStamped on /robot_N/initialpose",
     )
 
     one_tf_tree_arg = DeclareLaunchArgument(
@@ -341,6 +366,7 @@ def generate_launch_description():
             robot_config_path_arg,
             publish_ground_truth_map_arg,
             ground_truth_map_resolution_arg,
+            publish_initial_poses_arg,
             use_sim_time_arg,
             one_tf_tree_arg,
             generate_floorplan,

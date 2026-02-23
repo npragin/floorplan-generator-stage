@@ -9,9 +9,7 @@ setup(
     version="0.1.0",
     packages=find_packages(exclude=["test"]) + ["floorplan_generator"],
     package_dir={
-        "floorplan_generator": (
-            "floorplan_generator_stage/floorplan_generator/floorplan_generator"
-        ),
+        "floorplan_generator": ("floorplan_generator_stage/floorplan_generator/floorplan_generator"),
     },
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
@@ -48,6 +46,7 @@ setup(
     entry_points={
         "console_scripts": [
             "ground_truth_map_publisher = floorplan_generator_stage.ground_truth_map_publisher:main",
+            "initial_pose_publisher = floorplan_generator_stage.initial_pose_publisher:main",
         ],
     },
 )

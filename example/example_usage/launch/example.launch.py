@@ -37,6 +37,7 @@ def generate_launch_description():
             "floorplan_config_path": floorplan_config_path,
             "robot_config_path": robot_config_path,
             "publish_ground_truth_map": "true",
+            "publish_initial_poses": "true",
         }.items(),
     )
 
