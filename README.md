@@ -52,3 +52,7 @@ The robot templates describe how to instantiate a robot in the generated floorpl
 The floorplan generator launch file is accessible at `floorplan_generator_stage/launch/floorplan_generator_stage.launch.py`. It expects two arguments, `floorplan_config_path` and `robot_config_path`. You are responsible for managing your `STAGEPATH` environment variable, which must include the `world/` directory of the `floorplan_generator_stage` package.
 
 **On STAGEPATH:** During development, I ran into significant pain points managing `STAGEPATH`. As a result, the package copies the entire contents of `world/` from `source_package`'s share directory to the `floorplan_generator_stage` package's `world/` in its own share directory.
+
+### 4. Ground Truth Map Publishing
+
+The package publishes the generated floorplan as a nav_msgs/OccupancyGrid on `/ground_truth_map`. To publish the ground truth map, you must set the `publish_ground_truth_map` argument to `true` in the launch file. You should also set the `ground_truth_map_resolution` argument to the resolution of the ground truth map in meters per pixel. The default resolution is 0.05 meters per pixel. There is also a `use_sim_time` argument that defaults to `true`.

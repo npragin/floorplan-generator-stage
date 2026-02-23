@@ -46,6 +46,8 @@ setup(
         ],
     },
     entry_points={
-        "console_scripts": [],
+        "console_scripts": [
+            "ground_truth_map_publisher = floorplan_generator_stage.ground_truth_map_publisher:main",
+        ],
     },
 )

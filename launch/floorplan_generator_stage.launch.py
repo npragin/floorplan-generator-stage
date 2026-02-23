@@ -204,7 +204,9 @@ def process_generated_floorplan(context):
 
     print(f"Generated world file: {world_path}")
 
-    return [
+    use_sim_time = context.perform_substitution(LaunchConfiguration("use_sim_time")).lower() == "true"
+
+    nodes: list[Node] = [
         Node(
             package="stage_ros2",
             executable="stage_ros2",
@@ -213,9 +215,38 @@ def process_generated_floorplan(context):
             parameters=[
                 {"world_file": str(world_path)},
                 {"use_stamped_velocity": True},
+                {"use_sim_time": use_sim_time},
             ],
         )
     ]
+
+    publish_ground_truth_map = (
+        context.perform_substitution(LaunchConfiguration("publish_ground_truth_map")).lower() == "true"
+    )
+
+    if publish_ground_truth_map:
+        resolution = float(context.perform_substitution(LaunchConfiguration("ground_truth_map_resolution")))
+        floorplan_png = str(pkg_share / "world" / "bitmaps" / "floorplan.png")
+        width = config["map"]["width"]
+        height = config["map"]["height"]
+
+        nodes.append(
+            Node(
+                package="floorplan_generator_stage",
+                executable="ground_truth_map_publisher",
+                name="ground_truth_map_publisher",
+                output="screen",
+                parameters=[
+                    {"image_path": floorplan_png},
+                    {"resolution": resolution},
+                    {"map_width": float(width)},
+                    {"map_height": float(height)},
+                    {"use_sim_time": use_sim_time},
+                ],
+            )
+        )
+
+    return nodes
 
 
 def generate_launch_description():
@@ -231,6 +262,24 @@ def generate_launch_description():
         "robot_config_path",
         default_value="",
         description="Path to robot configuration YAML file (header_path and templates)",
+    )
+
+    publish_ground_truth_map_arg = DeclareLaunchArgument(
+        "publish_ground_truth_map",
+        default_value="false",
+        description="Publish the generated floorplan as a nav_msgs/OccupancyGrid on /ground_truth_map",
+    )
+
+    ground_truth_map_resolution_arg = DeclareLaunchArgument(
+        "ground_truth_map_resolution",
+        default_value="0.05",
+        description="Resolution (meters per cell) of the ground truth occupancy grid",
+    )
+
+    use_sim_time_arg = DeclareLaunchArgument(
+        "use_sim_time",
+        default_value="true",
+        description="Use simulation time from Stage",
     )
 
     output_path = PathJoinSubstitution([pkg_share, "output", "floorplan.png"])
@@ -263,6 +312,9 @@ def generate_launch_description():
         [
             floorplan_config_path_arg,
             robot_config_path_arg,
+            publish_ground_truth_map_arg,
+            ground_truth_map_resolution_arg,
+            use_sim_time_arg,
             generate_floorplan,
             process_floorplan_on_exit,
         ]
