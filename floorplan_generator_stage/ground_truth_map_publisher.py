@@ -33,9 +33,7 @@ class GroundTruthMapPublisher(Node):
         latched_qos = QoSProfile(depth=1, durability=QoSDurabilityPolicy.TRANSIENT_LOCAL)
         self._pub = self.create_publisher(OccupancyGrid, "/ground_truth_map", latched_qos)
 
-        # Publish immediately and then periodically so volatile subscribers (e.g. rviz) receive it
         self._publish()
-        self._timer = self.create_timer(2.0, self._publish)
 
         self.get_logger().info(
             f"Publishing ground truth map ({self._msg.info.width}x{self._msg.info.height}, resolution={resolution})"
