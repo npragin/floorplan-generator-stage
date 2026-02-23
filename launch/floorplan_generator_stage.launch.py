@@ -205,6 +205,7 @@ def process_generated_floorplan(context):
     print(f"Generated world file: {world_path}")
 
     use_sim_time = context.perform_substitution(LaunchConfiguration("use_sim_time")).lower() == "true"
+    one_tf_tree = context.perform_substitution(LaunchConfiguration("one_tf_tree")).lower() == "true"
 
     nodes: list[Node] = [
         Node(
@@ -216,6 +217,7 @@ def process_generated_floorplan(context):
                 {"world_file": str(world_path)},
                 {"use_stamped_velocity": True},
                 {"use_sim_time": use_sim_time},
+                {"one_tf_tree": one_tf_tree},
             ],
         )
     ]
@@ -282,6 +284,12 @@ def generate_launch_description():
         description="Use simulation time from Stage",
     )
 
+    one_tf_tree_arg = DeclareLaunchArgument(
+        "one_tf_tree",
+        default_value="false",
+        description="Publish all robot TFs to the shared /tf topic instead of per-robot /robot_N/tf",
+    )
+
     output_path = PathJoinSubstitution([pkg_share, "output", "floorplan.png"])
 
     generate_floorplan = ExecuteProcess(
@@ -315,6 +323,7 @@ def generate_launch_description():
             publish_ground_truth_map_arg,
             ground_truth_map_resolution_arg,
             use_sim_time_arg,
+            one_tf_tree_arg,
             generate_floorplan,
             process_floorplan_on_exit,
         ]

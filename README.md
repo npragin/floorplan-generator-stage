@@ -55,4 +55,4 @@ The floorplan generator launch file is accessible at `floorplan_generator_stage/
 
 ### 4. Ground Truth Map Publishing
 
-The package publishes the generated floorplan as a nav_msgs/OccupancyGrid on `/ground_truth_map`. To publish the ground truth map, you must set the `publish_ground_truth_map` argument to `true` in the launch file. You should also set the `ground_truth_map_resolution` argument to the resolution of the ground truth map in meters per pixel. The default resolution is 0.05 meters per pixel. There is also a `use_sim_time` argument that defaults to `true`.
+The package publishes the generated floorplan as a nav_msgs/OccupancyGrid on `/ground_truth_map`. To publish the ground truth map, you must set the `publish_ground_truth_map` argument to `true` in the launch file. You should also set the `ground_truth_map_resolution` argument to the resolution of the ground truth map in meters per pixel. The default resolution is 0.05 meters per pixel. There is also a `use_sim_time` argument that defaults to `true`. There is also a `one_tf_tree` launch argument that defaults to false. This is required when using AMCL or slam_toolbox for localization.
