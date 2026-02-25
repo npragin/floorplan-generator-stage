@@ -31,3 +31,9 @@ robot_radius = 0.255
 num_robots = 5
 robot_min_clearance = 0.5  # Minimum distance from walls and between robot edges (measured from outer edge of robot)
 spawn_export_filename = "world_config.yaml"
+
+# Extra Points (Anything you may need to add to the floorplan that is not a robot spawn position)
+# Found in the spawn_export_filename
+num_extra_points = 3
+extra_point_radius = 0.5
+extra_point_min_clearance = 0.0
