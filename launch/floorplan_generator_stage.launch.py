@@ -198,7 +198,7 @@ def process_generated_floorplan(context):
     # Fill in the world file template
     world_content = generate_world_file_content(pkg_share, config, robot_header_path, robot_templates)
 
-    world_path = pkg_share / "output" / "generated.world"
+    world_path = pkg_share / "world" / "generated.world"
     world_path.parent.mkdir(parents=True, exist_ok=True)
     with open(world_path, "w") as f:
         f.write(world_content)
