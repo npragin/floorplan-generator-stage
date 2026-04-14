@@ -32,6 +32,7 @@ num_robots = 5
 robot_min_clearance = 0.5  # Minimum distance from walls and between robot edges (measured from outer edge of robot)
 clustered_robot_spawns = true  # If true, robots are clustered. If false, all robots are placed randomly.
 spawn_export_filename = "world_config.yaml"
+# Robot orientation is controlled by the robot_config.yaml file
 
 # Extra Points (Anything you may need to add to the floorplan that is not a robot spawn position)
 # Found in the spawn_export_filename

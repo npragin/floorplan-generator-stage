@@ -60,20 +60,24 @@ def copy_world_files_from_source_package(pkg_share: Path, source_package: str | 
     print(f"Copied world/ directory from {source_package} to {dest_world_dir}")
 
 
-def load_robot_config(pkg_share: Path, robot_config_path_str: str | None) -> tuple[str | None, dict[str, int]]:
+def load_robot_config(
+    pkg_share: Path, robot_config_path_str: str | None
+) -> tuple[str | None, dict[str, int], bool, float]:
     """
     Load robot config from YAML, copy world files, and resolve paths.
 
     Returns:
-        Tuple of (robot_header_path, robot_templates).
+        Tuple of (robot_header_path, robot_templates, random_orientation, constant_orientation).
 
     """
     robot_header_path = None
     robot_templates: dict[str, int] = {}
     source_package = None
+    random_orientation = False
+    constant_orientation = 0.0
 
     if not robot_config_path_str:
-        return robot_header_path, robot_templates
+        return robot_header_path, robot_templates, random_orientation, constant_orientation
 
     with open(robot_config_path_str) as f:
         robot_config = yaml.safe_load(f)
@@ -93,11 +97,29 @@ def load_robot_config(pkg_share: Path, robot_config_path_str: str | None) -> tup
             template_path_abs = str(pkg_share / template_path_rel)
             robot_templates[template_path_abs] = template["count"]
 
-    return robot_header_path, robot_templates
+    random_orientation = bool(robot_config.get("random_orientation", False))
+
+    if not random_orientation:
+        if "constant_orientation" not in robot_config:
+            raise ValueError(
+                "constant_orientation must be specified in robot_config.yaml when random_orientation is false."
+            )
+        constant_orientation = float(robot_config["constant_orientation"])
+    else:
+        constant_orientation = 0.0
+
+    return robot_header_path, robot_templates, random_orientation, constant_orientation
 
 
-def generate_robot_instances(robot_templates: dict[str, int], spawn_positions: list[dict]) -> str:
+def generate_robot_instances(
+    robot_templates: dict[str, int],
+    spawn_positions: list[dict],
+    random_orientation: bool = False,
+    constant_orientation: float = 0.0,
+) -> str:
     """Generate robot instances from templates and spawn positions."""
+    import random
+
     total_robots_requested = sum(robot_templates.values())
     num_spawn_positions = len(spawn_positions)
 
@@ -120,18 +142,21 @@ def generate_robot_instances(robot_templates: dict[str, int], spawn_positions: l
             "{{robot-x}}" not in template_content
             or "{{robot-y}}" not in template_content
             or "{{robot-name}}" not in template_content
+            or "{{robot-heading}}" not in template_content
         ):
             raise ValueError(
-                f"Robot template '{template_path}' must contain {{robot-x}}, {{robot-y}}, and {{robot-name}} placeholders."
+                f"Robot template '{template_path}' must contain {{robot-x}}, {{robot-y}}, {{robot-name}}, and {{robot-heading}} placeholders."
             )
 
         for _ in range(count):
             spawn = spawn_positions[position_index]
             x = spawn["x"]
             y = spawn["y"]
+            heading = random.uniform(0.0, 360.0) if random_orientation else constant_orientation
             instance = template_content.replace("{{robot-x}}", str(x))
             instance = instance.replace("{{robot-y}}", str(y))
             instance = instance.replace("{{robot-name}}", f"robot_{position_index}")
+            instance = instance.replace("{{robot-heading}}", str(heading))
             robot_instances.append(instance)
             position_index += 1
 
@@ -143,6 +168,8 @@ def generate_world_file_content(
     config: dict,
     robot_header_path: str | None,
     robot_templates: dict[str, int],
+    random_orientation: bool = False,
+    constant_orientation: float = 0.0,
 ) -> str:
     width = config["map"]["width"]
     height = config["map"]["height"]
@@ -173,7 +200,9 @@ def generate_world_file_content(
     robot_content = ""
     if robot_templates:
         spawn_positions = config.get("robots", [])
-        robot_content = "\n\n" + generate_robot_instances(robot_templates, spawn_positions)
+        robot_content = "\n\n" + generate_robot_instances(
+            robot_templates, spawn_positions, random_orientation, constant_orientation
+        )
 
     world_content = header_content + base_content + robot_content
 
@@ -193,10 +222,14 @@ def process_generated_floorplan(context):
 
     # Get robot config path and parse it
     robot_config_path_str = context.perform_substitution(LaunchConfiguration("robot_config_path"))
-    robot_header_path, robot_templates = load_robot_config(pkg_share, robot_config_path_str)
+    robot_header_path, robot_templates, random_orientation, constant_orientation = load_robot_config(
+        pkg_share, robot_config_path_str
+    )
 
     # Fill in the world file template
-    world_content = generate_world_file_content(pkg_share, config, robot_header_path, robot_templates)
+    world_content = generate_world_file_content(
+        pkg_share, config, robot_header_path, robot_templates, random_orientation, constant_orientation
+    )
 
     world_path = pkg_share / "world" / "generated.world"
     world_path.parent.mkdir(parents=True, exist_ok=True)
@@ -267,9 +300,7 @@ def process_generated_floorplan(context):
             )
         )
 
-    publish_initial_poses = (
-        context.perform_substitution(LaunchConfiguration("publish_initial_poses")).lower() == "true"
-    )
+    publish_initial_poses = context.perform_substitution(LaunchConfiguration("publish_initial_poses")).lower() == "true"
 
     if publish_initial_poses:
         spawn_positions_yaml = str(pkg_share / "output" / "world_config.yaml")
