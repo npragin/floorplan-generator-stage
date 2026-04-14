@@ -29,6 +29,8 @@ The floorplan configuration file contains the parameters needed to generate the 
 
 The robot configuration file contains the necessary information to instantiate robots in the generated floorplan. The first field, `source_package`, is the name of the package that contains the templates I'll describe later. The second field, `header_path`, is the path to a file containing content to be inserted at the top of the generated `.world` file. The third field, `templates`, describes how to instantiate your robots in the generated floorplan. Each template has two fields: `path`, the path to the template file describing how to instantiate that robot, and `count`, the number of times to instantiate it. This provides support for heterogeneous robot types.
 
+The `random_orientation` field (default: `false`) controls whether each robot is spawned with a randomly generated heading. When `true`, each robot is assigned an independent uniformly random heading in [0, 360) degrees. When `false`, all robots use the heading specified by `constant_orientation`. The `constant_orientation` field is ignored when `random_orientation` is `true`.
+
 **On paths:** All paths in the robot configuration file are relative to the `source_package`'s `share` directory.
 
 **On counts:** The sum of the `count` fields in the robot configuration file must be equal to the `num_robots` field in the floorplan configuration file.
@@ -45,7 +47,7 @@ The header file is not a template. The contents of the header file will be inser
 
 #### Robot Templates: `example_usage/world/pioneer2dx_with_laser_template.world`
 
-The robot templates describe how to instantiate a robot in the generated floorplan. The template is expected to have two placeholders: `{{robot-x}}` and `{{robot-y}}`. The template will be pasted into the generated `.world` and these placeholders will be replaced with the robot's initial x and y position in the generated floorplan. The name of the robot will be `robot_0`, `robot_1`, ... based on the robot's global spawn index.
+The robot templates describe how to instantiate a robot in the generated floorplan. The template is expected to have four required placeholders: `{{robot-x}}`, `{{robot-y}}`, `{{robot-name}}`, and `{{robot-heading}}`. The template will be pasted into the generated `.world` and these placeholders will be replaced with the robot's initial x and y position, name (`robot_0`, `robot_1`, ...), and heading in degrees based on the robot's global spawn index. The heading value is controlled by the `random_orientation` and `constant_orientation` fields in the robot configuration file.
 
 ### 3. Launch File: `example_usage/launch/example.launch.py`
 
